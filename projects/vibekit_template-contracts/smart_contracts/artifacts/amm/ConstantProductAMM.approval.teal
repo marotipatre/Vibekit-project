@@ -884,13 +884,13 @@ swap:
     // smart_contracts/amm/contract.py:228-238
     // match swap_xfer.xfer_asset:
     //     case self.asset_a:
-    //         in_supply = self._current_b_balance()
-    //         out_supply = self._current_a_balance()
-    //         out_asset = self.asset_a
-    //     case self.asset_b:
     //         in_supply = self._current_a_balance()
     //         out_supply = self._current_b_balance()
     //         out_asset = self.asset_b
+    //     case self.asset_b:
+    //         in_supply = self._current_b_balance()
+    //         out_supply = self._current_a_balance()
+    //         out_asset = self.asset_a
     //     case _:
     //         assert False, "asset id incorrect"
     match swap_switch_case_0@2 swap_switch_case_1@3
@@ -900,20 +900,20 @@ swap:
 
 swap_switch_case_1@3:
     // smart_contracts/amm/contract.py:234
-    // in_supply = self._current_a_balance()
-    callsub _current_a_balance
+    // in_supply = self._current_b_balance()
+    callsub _current_b_balance
     bury 3
     // smart_contracts/amm/contract.py:235
-    // out_supply = self._current_b_balance()
-    callsub _current_b_balance
+    // out_supply = self._current_a_balance()
+    callsub _current_a_balance
     // smart_contracts/amm/contract.py:236
-    // out_asset = self.asset_b
+    // out_asset = self.asset_a
     intc_0 // 0
-    bytec_1 // "asset_b"
+    bytec_0 // "asset_a"
     app_global_get_ex
     swap
     bury 4
-    assert // check self.asset_b exists
+    assert // check self.asset_a exists
 
 swap_switch_case_next@5:
     // smart_contracts/amm/contract.py:335
@@ -965,20 +965,20 @@ swap_switch_case_next@5:
 
 swap_switch_case_0@2:
     // smart_contracts/amm/contract.py:230
-    // in_supply = self._current_b_balance()
-    callsub _current_b_balance
+    // in_supply = self._current_a_balance()
+    callsub _current_a_balance
     bury 3
     // smart_contracts/amm/contract.py:231
-    // out_supply = self._current_a_balance()
-    callsub _current_a_balance
+    // out_supply = self._current_b_balance()
+    callsub _current_b_balance
     // smart_contracts/amm/contract.py:232
-    // out_asset = self.asset_a
+    // out_asset = self.asset_b
     intc_0 // 0
-    bytec_0 // "asset_a"
+    bytec_1 // "asset_b"
     app_global_get_ex
     swap
     bury 4
-    assert // check self.asset_a exists
+    assert // check self.asset_b exists
     b swap_switch_case_next@5
 
 

@@ -227,13 +227,13 @@ class ConstantProductAMM(ARC4Contract):
 
         match swap_xfer.xfer_asset:
             case self.asset_a:
-                in_supply = self._current_b_balance()
-                out_supply = self._current_a_balance()
-                out_asset = self.asset_a
-            case self.asset_b:
                 in_supply = self._current_a_balance()
                 out_supply = self._current_b_balance()
                 out_asset = self.asset_b
+            case self.asset_b:
+                in_supply = self._current_b_balance()
+                out_supply = self._current_a_balance()
+                out_asset = self.asset_a
             case _:
                 assert False, "asset id incorrect"
 
