@@ -1,0 +1,14 @@
+name: Pull Request validation
+
+on: [pull_request]
+
+
+jobs:
+  vibekit_template-contracts-ci:
+    name: Run vibekit_template-contracts validation
+    uses: ./.github/workflows/vibekit_template-contracts-ci.yaml
+
+  vibekit_template-frontend-ci:
+    name: Run vibekit_template-frontend validation
+    uses: ./.github/workflows/vibekit_template-frontend-ci.yaml
+

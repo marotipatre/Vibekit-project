@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.vscode/**'
+      - '.idea/**'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  vibekit_template-contracts-validate:
+    name: Run vibekit_template-contracts release
+    secrets: inherit
+    uses: ./.github/workflows/vibekit_template-contracts-ci.yaml
+
+  vibekit_template-contracts-release:
+    name: Run vibekit_template-contracts release
+    secrets: inherit
+    uses: ./.github/workflows/vibekit_template-contracts-cd.yaml
+    needs: vibekit_template-contracts-validate
+
+  vibekit_template-frontend-validate:
+    name: Run vibekit_template-frontend release
+    secrets: inherit
+    uses: ./.github/workflows/vibekit_template-frontend-ci.yaml
+
+  vibekit_template-frontend-release:
+    name: Run vibekit_template-frontend release
+    secrets: inherit
+    uses: ./.github/workflows/vibekit_template-frontend-cd.yaml
+    needs: vibekit_template-frontend-validate
