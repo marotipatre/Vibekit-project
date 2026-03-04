@@ -1,52 +1,234 @@
-# vibekit_template
+# 🌊 Algorand AMM DEX — Built with VibeKit + AI Agents
 
-This starter full stack project has been generated using AlgoKit. See below for default getting started instructions.
+A fully functional **Constant Product AMM (Automated Market Maker)** decentralized exchange on Algorand, built entirely using **VibeKit MCP tools and AI agents** — from smart contract to React frontend.
 
-## Setup
+> **This project was built from a basic AlgoKit template using only natural language prompts to an AI agent (GitHub Copilot with VibeKit MCP). No manual coding required.**
 
-### Initial setup
-1. Clone this repository to your local machine.
-2. Ensure [Docker](https://www.docker.com/) is installed and operational. Then, install `AlgoKit` following this [guide](https://github.com/algorandfoundation/algokit-cli#install).
-3. Run `algokit project bootstrap all` in the project directory. This command sets up your environment by installing necessary dependencies, setting up a Python virtual environment, and preparing your `.env` file.
-4. In the case of a smart contract project, execute `algokit generate env-file -a target_network localnet` from the `vibekit_template-contracts` directory to create a `.env.localnet` file with default configuration for `localnet`.
-5. To build your project, execute `algokit project run build`. This compiles your project and prepares it for running.
-6. For project-specific instructions, refer to the READMEs of the child projects:
-   - Smart Contracts: [vibekit_template-contracts](projects/vibekit_template-contracts/README.md)
-   - Frontend Application: [vibekit_template-frontend](projects/vibekit_template-frontend/README.md)
+![Algorand](https://img.shields.io/badge/Algorand-black?logo=algorand) ![Python](https://img.shields.io/badge/PuyaPy-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 
-> This project is structured as a monorepo, refer to the [documentation](https://github.com/algorandfoundation/algokit-cli/blob/main/docs/features/project/run.md) to learn more about custom command orchestration via `algokit project run`.
+---
 
-### Subsequently
+## 🎯 What This Project Does
 
-1. If you update to the latest source code and there are new dependencies, you will need to run `algokit project bootstrap all` again.
-2. Follow step 3 above.
+- **Deploy** an AMM smart contract on Algorand
+- **Bootstrap** a liquidity pool with any two ASA tokens
+- **Mint** LP tokens by depositing token pairs
+- **Swap** tokens using the constant product formula (x × y = k) with 0.5% fee
+- **Burn** LP tokens to withdraw your share of the pool
+- **View** pool info, reserves, price ratios, and formula explanations
 
-### Continuous Integration / Continuous Deployment (CI/CD)
+## 📐 AMM Formulas (On-Chain)
 
-This project uses [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions) to define CI/CD workflows, which are located in the [`.github/workflows`](./.github/workflows) folder. You can configure these actions to suit your project's needs, including CI checks, audits, linting, type checking, testing, and deployments to TestNet.
+| Operation | Formula |
+|-----------|---------|
+| Initial Mint | `LP = √(amount_A × amount_B) - 1000` |
+| Subsequent Mint | `LP = min(1000 × A_deposit / A_reserve, 1000 × B_deposit / B_reserve) × issued / 1000` |
+| Swap | `output = (input × 995 × out_reserve) / (in_reserve × 1000 + input × 995)` |
+| Burn | `amount_out = reserve × burn_amount / total_issued` |
 
-For pushes to `main` branch, after the above checks pass, the following deployment actions are performed:
-  - The smart contract(s) are deployed to TestNet using [AlgoNode](https://algonode.io).
-  - The frontend application is deployed to a provider of your choice (Netlify, Vercel, etc.). See [frontend README](frontend/README.md) for more information.
+---
 
-> Please note deployment of smart contracts is done via `algokit deploy` command which can be invoked both via CI as seen on this project, or locally. For more information on how to use `algokit deploy` please see [AlgoKit documentation](https://github.com/algorandfoundation/algokit-cli/blob/main/docs/features/deploy.md).
+## 🛠️ Prerequisites
 
-## Tools
+Before starting, ensure you have:
 
-This project makes use of Python and React to build Algorand smart contracts and to provide a base project configuration to develop frontends for your Algorand dApps and interactions with smart contracts. The following tools are in use:
+1. **[AlgoKit CLI](https://github.com/algorandfoundation/algokit-cli#install)** installed
+2. **[Docker](https://www.docker.com/)** installed and running (for LocalNet)
+3. **[Node.js](https://nodejs.org/)** (v18+) and **pnpm**
+4. **[Python](https://www.python.org/)** (3.12+)
+5. **VS Code** with [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) extension
+6. **VibeKit MCP** configured in VS Code (see [VibeKit docs](https://github.com/algorandfoundation/vibekit))
 
-- Algorand, AlgoKit, and AlgoKit Utils
-- Python dependencies including Poetry, Black, Ruff or Flake8, mypy, pytest, and pip-audit
-- React and related dependencies including AlgoKit Utils, Tailwind CSS, daisyUI, use-wallet, npm, jest, playwright, Prettier, ESLint, and Github Actions workflows for build validation
+---
 
-### VS Code
+## 🚀 Recreate This Project — Step-by-Step Prompts
 
-It has also been configured to have a productive dev experience out of the box in [VS Code](https://code.visualstudio.com/), see the [backend .vscode](./backend/.vscode) and [frontend .vscode](./frontend/.vscode) folders for more details.
+Below are the exact prompts you can give to GitHub Copilot (Agent mode with VibeKit MCP) to recreate this entire project from scratch.
 
-## Integrating with smart contracts and application clients
+### Phase 1: Project Setup
 
-Refer to the [vibekit_template-contracts](projects/vibekit_template-contracts/README.md) folder for overview of working with smart contracts, [projects/vibekit_template-frontend](projects/vibekit_template-frontend/README.md) for overview of the React project and the [projects/vibekit_template-frontend/contracts](projects/vibekit_template-frontend/src/contracts/README.md) folder for README on adding new smart contracts from backend as application clients on your frontend. The templates provided in these folders will help you get started.
-When you compile and generate smart contract artifacts, your frontend component will automatically generate typescript application clients from smart contract artifacts and move them to `frontend/src/contracts` folder, see [`generate:app-clients` in package.json](projects/vibekit_template-frontend/package.json). Afterwards, you are free to import and use them in your frontend application.
+#### Step 1 — Initialize the AlgoKit Template
+
+Run this in your terminal manually:
+
+```bash
+algokit init
+```
+
+Choose:
+- Template: **Official** → **Full-stack (React frontend + Python smart contract)**
+- Name: your project name
+- Defaults for everything else
+
+Then open the project in VS Code.
+
+#### Step 2 — Start LocalNet
+
+```bash
+algokit localnet start
+```
+
+---
+
+### Phase 2: Smart Contract Development
+
+#### Prompt 1 — Create the AMM Contract
+
+> "Create a Constant Product AMM smart contract in Algorand Python (PuyaPy). The contract should have these methods:
+> - `bootstrap` — Initialize the pool with two ASA tokens, create a pool token (LP token with 3 decimals, total supply 10 billion), opt into both assets
+> - `mint` — Accept deposits of both tokens and mint LP tokens proportionally. First mint uses sqrt(a*b)-1000, subsequent mints use min ratio
+> - `burn` — Accept LP tokens back and return proportional share of both assets
+> - `swap` — Accept one token and return the other using constant product formula with 0.5% fee (fee=5, scale=1000)
+> - `set_governor` — Allow governor to transfer admin rights
+>
+> Use constants: TOTAL_SUPPLY=10_000_000_000, SCALE=1000, FEE=5, FACTOR=995.
+> Place it in `smart_contracts/amm/contract.py`. Look at the canonical AMM example from `algorandfoundation/puya` repo for reference."
+
+#### Prompt 2 — Write Tests
+
+> "Write integration tests for the AMM contract in `tests/amm_client_test.py`. Test:
+> 1. Bootstrap creates pool token and sets state correctly
+> 2. Initial mint with equal token amounts returns correct LP tokens
+> 3. Swap sends correct output token with fee applied
+> 4. Burn returns proportional assets
+>
+> Use pytest with AlgorandClient and the generated Python client. Create two test ASA tokens with total supply of 10,000,000 each. Make sure all tests pass."
+
+#### Prompt 3 — Build and Verify
+
+> "Build the smart contract using `algokit project run build`, make sure it compiles successfully, then run the tests to verify all 5 pass."
+
+---
+
+### Phase 3: Frontend Development
+
+#### Prompt 4 — Create the Frontend Components
+
+> "Create a React frontend for the AMM DEX with these components:
+>
+> 1. **DeployPool** — Deploy the AMM contract, show App ID and App Address
+> 2. **BootstrapPool** — Enter two asset IDs (auto-sort so user doesn't need to worry about A < B ordering), send seed payment + bootstrap call, show pool token ID. Fetch and display token names as user types asset IDs.
+> 3. **MintLiquidity** — Deposit both tokens, show estimated LP tokens to receive, handle opt-in to LP token, show formula explanation
+> 4. **SwapTokens** — Intuitive 'You Send → You Receive' UI with direction toggle button, live swap output estimate, show pool reserves and 0.5% fee info
+> 5. **BurnLiquidity** — Enter LP tokens to burn, show estimated withdrawal amounts for both tokens
+> 6. **PoolInfo** — Dashboard showing reserves, price ratio, LP tokens issued, swap fee, pool ALGO balance
+>
+> Also create a shared `useAssetInfo` hook in `src/hooks/useAssetInfo.ts` that:
+> - Fetches ASA name, unit name, and decimals by asset ID with caching
+> - Exports `formatAmount(bigint, decimals)` and `parseAmount(string, decimals)` utilities
+> - Exports estimation functions: `estimateMint`, `estimateBurn`, `estimateSwapOutput`
+> - Exports pool token constants (TOTAL_SUPPLY, DECIMALS, SCALE, FEE, FACTOR)
+>
+> Use the generated TypeScript client `ConstantProductAmmClient` for all contract calls. Show token names everywhere instead of just IDs. Include formula explainer dropdowns in each component.
+>
+> Wire everything together in `Home.tsx` with:
+> - Tabbed navigation: Setup | Swap | Liquidity | Info
+> - Progress stepper showing Deploy → Initialize → Ready
+> - Pool status banner with token names
+> - 'Connect to Existing Pool' section that auto-fetches token info
+>
+> Stack: React 18, TypeScript, TailwindCSS, DaisyUI, notistack for notifications, @txnlab/use-wallet-react for wallet connection."
+
+#### Prompt 5 — Generate TypeScript Client
+
+> "Generate the TypeScript application client from the ARC-56 app spec at `smart_contracts/artifacts/amm/ConstantProductAMM.arc56.json` and output it to `src/contracts/ConstantProductAMM.ts` in the frontend project."
+
+---
+
+### Phase 4: Testing & Bug Fixes
+
+#### Prompt 6 — Test the Full Flow
+
+> "Start the dev server and help me test the full flow: deploy contract, create two test tokens, bootstrap pool, add liquidity, swap tokens, check pool info, and remove liquidity."
+
+#### Prompt 7 — Fix Common Issues (if encountered)
+
+If swap returns the **same token** instead of the other:
+
+> "The swap is returning the same token I sent instead of the other one. Check the contract's swap method — the `in_supply`, `out_supply`, and `out_asset` assignments in the match cases might be swapped. Compare with the canonical Beaker AMM example from `algorandfoundation/beaker`."
+
+If burn gives a **division by zero** error when removing all liquidity:
+
+> "Burning all LP tokens gives a '/ 0' error. Check `_update_ratio()` — when the pool is emptied, `b_balance` is 0, causing division by zero. Add a guard: if b_balance > 0, compute ratio; else set ratio to 0."
+
+If burn estimation shows **wrong amounts**:
+
+> "The burn estimation shows wrong amounts. Check the `tokens_to_burn` function — in AVM, the asset transfer in the group executes before the app call, so `pool_balance` already includes the returned LP tokens. The formula should be `issued = TOTAL_SUPPLY - (pool_balance - amount)` not `TOTAL_SUPPLY - pool_balance - amount`."
+
+---
+
+## 📂 Project Structure
+
+```
+├── projects/
+│   ├── vibekit_template-contracts/       # Smart contract (Python/PuyaPy)
+│   │   ├── smart_contracts/
+│   │   │   ├── amm/
+│   │   │   │   ├── contract.py           # AMM contract (354 lines)
+│   │   │   │   └── deploy_config.py
+│   │   │   └── artifacts/amm/            # Compiled TEAL + ARC-56 spec
+│   │   └── tests/
+│   │       └── amm_client_test.py        # 5 integration tests
+│   │
+│   └── vibekit_template-frontend/        # React frontend
+│       └── src/
+│           ├── Home.tsx                  # Main page with tabs + state management
+│           ├── hooks/
+│           │   └── useAssetInfo.ts       # Asset info fetching, caching, formulas
+│           ├── components/
+│           │   ├── DeployPool.tsx         # Deploy AMM contract
+│           │   ├── BootstrapPool.tsx      # Initialize pool (auto-sort assets)
+│           │   ├── MintLiquidity.tsx      # Add liquidity + LP estimate
+│           │   ├── SwapTokens.tsx         # Swap with direction toggle
+│           │   ├── BurnLiquidity.tsx      # Remove liquidity + estimates
+│           │   ├── PoolInfo.tsx           # Pool dashboard
+│           │   └── ConnectWallet.tsx      # Wallet connection modal
+│           └── contracts/
+│               └── ConstantProductAMM.ts # Generated TypeScript client
+```
+
+## ⚡ Quick Start (After Cloning)
+
+```bash
+# 1. Install dependencies
+algokit project bootstrap all
+
+# 2. Start LocalNet
+algokit localnet start
+
+# 3. Build smart contracts
+cd projects/vibekit_template-contracts
+algokit project run build
+
+# 4. Start frontend
+cd ../vibekit_template-frontend
+npm run dev
+```
+
+Open http://localhost:5173, connect wallet (KMD for localnet), and start trading!
+
+## 🧪 Run Tests
+
+```bash
+cd projects/vibekit_template-contracts
+poetry run pytest tests/amm_client_test.py -v
+```
+
+## 🔑 Key Learnings
+
+1. **VibeKit MCP** provides AI agents direct access to Algorand documentation, GitHub examples, and on-chain tools
+2. **PuyaPy** compiles Python to TEAL — but it's an AVM-constrained subset, not full Python
+3. **AVM execution order matters** — in atomic groups, asset transfers execute before app calls, affecting balance reads
+4. **Always compare with canonical examples** from `algorandfoundation/puya` and `algorandfoundation/beaker`
+5. **Pool token decimals** (3 in this case) require careful `formatAmount`/`parseAmount` conversions throughout the UI
+
+## 📜 License
+
+This project is provided as an educational example. Do NOT deploy to mainnet without thorough security audits.
+
+---
+
+*Built with ❤️ using [AlgoKit](https://github.com/algorandfoundation/algokit-cli) + [VibeKit](https://github.com/algorandfoundation/vibekit) + GitHub Copilot*
 
 The frontend starter also provides an example of interactions with your HelloWorldClient in [`AppCalls.tsx`](projects/vibekit_template-frontend/src/components/AppCalls.tsx) component by default.
 
