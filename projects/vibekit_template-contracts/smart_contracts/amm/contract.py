@@ -177,8 +177,9 @@ class ConstantProductAMM(ARC4Contract):
         assert pool_xfer.xfer_asset == self.pool_token, "asset pool incorrect"
         assert pool_xfer.sender == Txn.sender, "sender invalid"
 
-        # Get the total number of tokens issued
-        # !important: this happens prior to receiving the current axfer of pool tokens
+        # Get the pool token balance (this INCLUDES the just-transferred LP tokens
+        # because the asset_transfer in the group executes before this app_call).
+        # tokens_to_burn() accounts for this by subtracting `amount` from pool_balance.
         pool_balance = self._current_pool_balance()
         a_amt = tokens_to_burn(
             pool_balance=pool_balance,
@@ -254,7 +255,10 @@ class ConstantProductAMM(ARC4Contract):
         a_balance = self._current_a_balance()
         b_balance = self._current_b_balance()
 
-        self.ratio = a_balance * SCALE // b_balance
+        if b_balance > 0:
+            self.ratio = a_balance * SCALE // b_balance
+        else:
+            self.ratio = UInt64(0)
 
     @subroutine
     def _check_is_governor(self) -> None:
@@ -326,7 +330,10 @@ def tokens_to_mint(
 
 @subroutine
 def tokens_to_burn(*, pool_balance: UInt64, supply: UInt64, amount: UInt64) -> UInt64:
-    issued = TOTAL_SUPPLY - pool_balance - amount
+    # pool_balance already includes the LP tokens transferred in this group,
+    # so subtract `amount` from it to get the pre-transfer balance, then
+    # derive issued = TOTAL_SUPPLY - pre_transfer_balance.
+    issued = TOTAL_SUPPLY - (pool_balance - amount)
     return supply * amount // issued
 
 

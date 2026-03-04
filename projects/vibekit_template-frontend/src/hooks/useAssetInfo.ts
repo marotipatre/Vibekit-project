@@ -183,10 +183,16 @@ export function estimateBurn(
   burnAmount: bigint,
 ): { aOut: bigint; bOut: bigint } {
   if (burnAmount <= 0n) return { aOut: 0n, bOut: 0n }
-  // The contract reads pool_balance BEFORE the pool token transfer arrives.
-  // Then: issued = TOTAL_SUPPLY - pool_balance - amount
-  // pool_balance here is what we read from account info (before user sends the burn txn)
-  const issued = POOL_TOKEN_TOTAL_SUPPLY - poolBalance - burnAmount
+  // On-chain, pool_balance already includes the LP tokens transferred in the
+  // atomic group (asset_transfer executes before the app_call). The contract
+  // computes: issued = TOTAL_SUPPLY - (pool_balance - amount)
+  //
+  // When estimating in the frontend, poolBalance is the PRE-transfer balance
+  // (read from account info before the user sends the txn). After the transfer
+  // arrives the on-chain balance becomes poolBalance + burnAmount, so:
+  //   issued = TOTAL_SUPPLY - ((poolBalance + burnAmount) - burnAmount)
+  //          = TOTAL_SUPPLY - poolBalance
+  const issued = POOL_TOKEN_TOTAL_SUPPLY - poolBalance
   if (issued <= 0n) return { aOut: 0n, bOut: 0n }
   return {
     aOut: aSupply * burnAmount / issued,
