@@ -1,5 +1,7 @@
 // src/Home.tsx
+import { AlgorandClient } from '@algorandfoundation/algokit-utils'
 import { useWallet } from '@txnlab/use-wallet-react'
+import { getApplicationAddress } from 'algosdk'
 import React, { useState } from 'react'
 import BootstrapPool from './components/BootstrapPool'
 import BurnLiquidity from './components/BurnLiquidity'
@@ -8,7 +10,9 @@ import DeployPool from './components/DeployPool'
 import MintLiquidity from './components/MintLiquidity'
 import PoolInfo from './components/PoolInfo'
 import SwapTokens from './components/SwapTokens'
+import { ConstantProductAmmClient } from './contracts/ConstantProductAMM'
 import { fetchAssetInfo } from './hooks/useAssetInfo'
+import { getAlgodConfigFromViteEnvironment, getIndexerConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 
 type Tab = 'deploy' | 'swap' | 'liquidity' | 'info'
 
@@ -39,31 +43,58 @@ const Home: React.FC = () => {
 
   // Connect to existing pool
   const [existingAppId, setExistingAppId] = useState('')
-  const [existingAppAddr, setExistingAppAddr] = useState('')
-  const [existingAssetA, setExistingAssetA] = useState('')
-  const [existingAssetB, setExistingAssetB] = useState('')
-  const [existingPoolToken, setExistingPoolToken] = useState('')
   const [connectLoading, setConnectLoading] = useState(false)
+  const [connectError, setConnectError] = useState('')
 
   const handleConnectExisting = async () => {
-    if (!existingAppId || !existingAppAddr || !existingAssetA || !existingAssetB || !existingPoolToken) return
+    if (!existingAppId) return
     setConnectLoading(true)
+    setConnectError('')
     try {
-      const aId = BigInt(existingAssetA)
-      const bId = BigInt(existingAssetB)
+      const numericAppId = BigInt(existingAppId)
+
+      // Derive app address from App ID
+      const derivedAppAddress = getApplicationAddress(numericAppId)
+
+      // Create a client to read global state
+      const algodConfig = getAlgodConfigFromViteEnvironment()
+      const indexerConfig = getIndexerConfigFromViteEnvironment()
+      const algorand = AlgorandClient.fromConfig({ algodConfig, indexerConfig })
+
+      const client = new ConstantProductAmmClient({
+        appId: numericAppId,
+        algorand,
+      })
+
+      // Read all global state from the contract
+      const globalState = await client.state.global.getAll()
+
+      if (!globalState.assetA || !globalState.assetB || !globalState.poolToken) {
+        setConnectError('Pool not bootstrapped yet — asset_a, asset_b, or pool_token missing.')
+        return
+      }
+
+      const aId = globalState.assetA
+      const bId = globalState.assetB
+      const ptId = globalState.poolToken
+
+      // Fetch asset info (names, decimals)
       const [infoA, infoB] = await Promise.all([
         fetchAssetInfo(aId).catch(() => null),
         fetchAssetInfo(bId).catch(() => null),
       ])
-      setAppId(BigInt(existingAppId))
-      setAppAddress(existingAppAddr)
+
+      setAppId(numericAppId)
+      setAppAddress(String(derivedAppAddress))
       setAssetA(aId)
       setAssetB(bId)
-      setPoolTokenId(BigInt(existingPoolToken))
+      setPoolTokenId(ptId)
       setAssetAName(infoA ? (infoA.unitName || infoA.name) : `Asset #${aId}`)
       setAssetBName(infoB ? (infoB.unitName || infoB.name) : `Asset #${bId}`)
       setAssetADecimals(infoA?.decimals ?? 0)
       setAssetBDecimals(infoB?.decimals ?? 0)
+    } catch (e: any) {
+      setConnectError(e.message || 'Failed to connect to pool')
     } finally {
       setConnectLoading(false)
     }
@@ -190,25 +221,26 @@ const Home: React.FC = () => {
               <div className="card-body">
                 <h2 className="card-title text-lg">🔗 Connect to Existing Pool</h2>
                 <p className="text-sm opacity-70">
-                  Already deployed a pool? Enter the details below. Token names and decimals will be fetched automatically.
+                  Already deployed a pool? Just enter the App ID — everything else is fetched automatically from the contract.
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <input type="number" placeholder="App ID" className="input input-bordered input-sm"
-                    value={existingAppId} onChange={(e) => setExistingAppId(e.target.value)} />
-                  <input type="text" placeholder="App Address" className="input input-bordered input-sm"
-                    value={existingAppAddr} onChange={(e) => setExistingAppAddr(e.target.value)} />
-                  <input type="number" placeholder="Asset A ID" className="input input-bordered input-sm"
-                    value={existingAssetA} onChange={(e) => setExistingAssetA(e.target.value)} />
-                  <input type="number" placeholder="Asset B ID" className="input input-bordered input-sm"
-                    value={existingAssetB} onChange={(e) => setExistingAssetB(e.target.value)} />
-                  <input type="number" placeholder="Pool Token ID" className="input input-bordered input-sm col-span-2"
-                    value={existingPoolToken} onChange={(e) => setExistingPoolToken(e.target.value)} />
-                </div>
-                <div className="card-actions justify-end mt-2">
-                  <button className="btn btn-outline btn-sm" onClick={handleConnectExisting} disabled={connectLoading}>
-                    {connectLoading ? <span className="loading loading-spinner loading-xs" /> : 'Connect'}
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Enter App ID"
+                    className="input input-bordered input-sm flex-1"
+                    value={existingAppId}
+                    onChange={(e) => setExistingAppId(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleConnectExisting()}
+                  />
+                  <button className="btn btn-outline btn-sm" onClick={handleConnectExisting} disabled={connectLoading || !existingAppId}>
+                    {connectLoading ? <span className="loading loading-spinner loading-xs" /> : '🔗 Connect'}
                   </button>
                 </div>
+                {connectError && (
+                  <div className="alert alert-error text-sm mt-2 py-2">
+                    <span>❌ {connectError}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
