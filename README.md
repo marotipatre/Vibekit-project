@@ -228,7 +228,7 @@ This project is provided as an educational example. Do NOT deploy to mainnet wit
 
 ---
 
-*Built with ❤️ using [AlgoKit](https://github.com/algorandfoundation/algokit-cli) + [VibeKit](https://github.com/algorandfoundation/vibekit) + GitHub Copilot*
+*Built with ❤️ using [AlgoKit](https://github.com/algorandfoundation/algokit-cli) + [VibeKit](https://www.getvibekit.ai/) + GitHub Copilot*
 
 The frontend starter also provides an example of interactions with your HelloWorldClient in [`AppCalls.tsx`](projects/vibekit_template-frontend/src/components/AppCalls.tsx) component by default.
 
